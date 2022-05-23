@@ -60,7 +60,7 @@ class FMCell : public Cell{
         virtual inline double getTotalValue() const               
         {
             // return value_ + 1.0 * hValue_ - sValue_;
-            return value_ + 2.0 * hValue_ - sValue_;
+            return value_ + 2.0 * hValue_ - 2.0*sValue_;
             //return value_ + 2.0 * hValue_; // in very large scale with high obs ddensity, h > 1 improve performance sigfcantly
         }
         virtual inline double getVelocity() const                 {return occupancy_;}

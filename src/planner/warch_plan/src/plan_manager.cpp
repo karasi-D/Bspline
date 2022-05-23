@@ -72,6 +72,7 @@ namespace warch_plan
         nh.param("vis/is_proj_cube",   _is_proj_cube, true);
 
         nh.param("planning/is_use_fm",     _is_use_fm,  true);
+        nh.param("planning/is_useFusion",     useFusion,  false);
         nh.param("planning/target_type",     target_type,  2.0);
 
         useSwarm = true;// true        
@@ -479,7 +480,7 @@ namespace warch_plan
                 ROS_WARN("[UAV %d] not sensed itself local map", pp_.uav_id);
             return;
         }
-        return;
+        if(!useFusion) return;
         has_fusion = true;
 
         // ROS_INFO("[UAV %d] nbr envInfo numbers = %d", pp_.uav_id, nbrEnv.size());
@@ -1658,6 +1659,7 @@ namespace warch_plan
         for(int i = 0; i < (int)nbrInfo.size(); i ++){
             if(!nbrInfo[i].live) continue;
 
+            int depth = double(2.0) /double(_resolution) ;
             queue<unsigned int> q_path;
             vector<bool> Cell_vis(size_x * size_y * size_z, false);
             for(int j = 0; j < (int)nbrInfo[i].path_coord.size(); j ++){
@@ -1665,10 +1667,9 @@ namespace warch_plan
                 unsigned int nbr_idx = (unsigned int)ptIdx3d[2] * size_y * size_x + (unsigned int)ptIdx3d[1] * size_x + (unsigned int)ptIdx3d[0];
                 Cell_vis[nbr_idx] = true;
                 // nbr_diff[nbr_idx] = 0.0; 
-                nbr_diff[nbr_idx] = group_distance;
+                nbr_diff[nbr_idx] = depth * group_distance;
                 q_path.push(nbr_idx);
             }
-            int depth = double(2.0) /double(_resolution) ;
             while(q_path.size() && depth){
                 int q_len = q_path.size();
                 depth --;
@@ -1686,7 +1687,7 @@ namespace warch_plan
                                     - (2 - sqrt(2)) *(dx + dy + dz - min(dx, min(dy, dz)) - max(dx, max(dy, dz))) - min(dx, min(dy, dz)));
                                 //double d_dis = sqrt(dx*dx + dy*dy + dz*dz);
                                 // nbr_diff[d_idx] = max(nbr_diff[d_idx], nbr_diff[q_idx] + d_dis*_resolution);
-                                nbr_diff[d_idx] = min(nbr_diff[d_idx], nbr_diff[q_idx] - d_dis*_resolution);
+                                nbr_diff[d_idx] = 0.5*depth*min(nbr_diff[d_idx], nbr_diff[q_idx] - d_dis*_resolution);
                                 Cell_vis[d_idx] = true;
                                 q_path.push(d_idx);
                             }

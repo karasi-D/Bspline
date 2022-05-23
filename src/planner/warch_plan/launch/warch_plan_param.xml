@@ -42,6 +42,7 @@
       <remap from="~planning/flyInfo_self_pub"   to = "/uav_$(arg uav_id)_swap_flyInfo"/>
 
       <param name="planning/is_use_fm"  value="true" />
+      <param name="planning/is_useFusion"  value="false" />
       <param name="planning/target_type"  value="1.0"/>
       <param name="optimization/poly_order"  value="8"/> 
       <param name="optimization/min_order"   value="3.0"/> 

@@ -189,7 +189,7 @@ namespace warch_plan
     
     // group request info
     int group_num;
-    bool has_fusion, swarmSyn;
+    bool has_fusion, swarmSyn, useFusion;
     double group_distance;
     std::vector<Vector3d> refer_target;
     std::vector<int8_t> data_vec;

@@ -82,7 +82,7 @@ else(ENABLE_CUDA)
 
   add_executable(
     pcl_render_node
-    src/pointcloud_render_node.cpp
+    src/simPCL_render_node.cpp
   )
 
   target_link_libraries( pcl_render_node

@@ -1,0 +1,107 @@
+<launch>
+
+    <arg name="map_size_x" default="46.0"/>
+    <arg name="map_size_y" default="30.0"/>
+    <arg name="map_size_z" default=" 4.0"/>
+
+    <arg name="init_x" default="-20.0"/>
+    <arg name="init_y" default="-20.0"/>
+    <arg name="init_z" default="  0.5"/>
+
+    <arg name="map_frame_name"  default="/world"/>
+    <arg name="group_distance"  default="2.0"/>
+    <arg name="group_num"       default="3"/>
+    <arg name="mv_obs_vel"      default="-3.0"/>
+
+    <arg name="sensing_horizon"  default="8.0" />
+    <arg name="sensing_rate"     default="30.0"/>
+    <arg name="estimation_rate"  default="30.0"/>
+    <!--dynamic param set-->
+    <!-- <node pkg="rqt_reconfigure" name="rqt_reconfigure" type="rqt_reconfigure" output="screen" /> -->
+
+  <!-- Set the goal -->
+  <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+      <remap from="~goal"           to="/goal"/>
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <param name="waypoint_type"   value="manual-lonely-waypoint"/>    
+  </node>
+
+    <!--run 2 UAV=drone by order drone_id=[0-1] -->
+    <include file="$(find warch_plan)/launch/run_in_swarm.launch">
+        <arg name="uav_id" value="1"/>
+
+        <arg name="init_x"      value="-18.0"/>
+        <arg name="init_y"      value="0.0"/>
+        <arg name="init_z"      value="0.2"/>
+        <arg name="target_x" value="20.0"/>
+        <arg name="target_y" value="-4.0"/>
+        <arg name="target_z" value="2.0"/>
+
+        <arg name="map_size_x" value="$(arg map_size_x)"/>
+        <arg name="map_size_y" value="$(arg map_size_y)"/>
+        <arg name="map_size_z" value="$(arg map_size_z)"/>
+
+        <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+        <arg name="sensing_rate"    value="$(arg sensing_rate)"/>
+        <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+        <arg name="group_distance"  value="$(arg group_distance)"/>
+        <arg name="group_num"       value="$(arg group_num)"/>
+        <arg name="mv_obs_vel"      value="$(arg mv_obs_vel)"/>
+
+        <arg name="envInfo_nbr1"    value = "2"/>
+        <arg name="envInfo_nbr2"    value = "3"/>
+    </include>
+
+    <include file="$(find warch_plan)/launch/run_in_swarm.launch">
+        <arg name="uav_id" value="2"/>
+
+        <arg name="init_x" value="-20.0"/>
+        <arg name="init_y" value="-2"/>
+        <arg name="init_z" value="0.2"/>
+        <arg name="target_x" value="18"/>
+        <arg name="target_y" value="-6"/>
+        <arg name="target_z" value="2.0"/>
+
+        <arg name="map_size_x" value="$(arg map_size_x)"/>
+        <arg name="map_size_y" value="$(arg map_size_y)"/>
+        <arg name="map_size_z" value="$(arg map_size_z)"/>
+        
+        <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+        <arg name="sensing_rate"    value="$(arg sensing_rate)"/>
+        <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+        <arg name="group_distance"  value="$(arg group_distance)"/>
+        <arg name="group_num"       value="$(arg group_num)"/>
+        <arg name="mv_obs_vel"      value="$(arg mv_obs_vel)"/>
+
+        <arg name="envInfo_nbr1"    value = "1"/>
+        <arg name="envInfo_nbr2"    value = "4"/>
+
+    </include>
+    
+    <include file="$(find warch_plan)/launch/run_in_swarm.launch">
+        <arg name="uav_id" value="3"/>
+
+        <arg name="init_x" value="-20.0"/>
+        <arg name="init_y" value="2"/>
+        <arg name="init_z" value="0.2"/>
+        <arg name="target_x" value="18.0"/>
+        <arg name="target_y" value="-2.0"/>
+        <arg name="target_z" value="2.0"/>
+
+        <arg name="map_size_x" value="$(arg map_size_x)"/>
+        <arg name="map_size_y" value="$(arg map_size_y)"/>
+        <arg name="map_size_z" value="$(arg map_size_z)"/>
+        
+        <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+        <arg name="sensing_rate"    value="$(arg sensing_rate)"/>
+        <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+        <arg name="group_distance"  value="$(arg group_distance)"/>
+        <arg name="group_num"       value="$(arg group_num)"/>
+        <arg name="mv_obs_vel"      value="$(arg mv_obs_vel)"/>
+
+        <arg name="envInfo_nbr1"    value = "1"/>
+        <arg name="envInfo_nbr2"    value = "4"/>
+
+    </include>
+        
+</launch>

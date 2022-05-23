@@ -1,0 +1,41 @@
+<launch>
+    <arg name="map_size_x" default="48.0"/>
+    <arg name="map_size_y" default="30.0"/>
+    <arg name="map_size_z" default=" 4.0"/>
+
+    <arg name="init_x" default="-20.0"/>
+    <arg name="init_y" default="-20.0"/>
+    <arg name="init_z" default="  0.5"/>
+
+    <arg name="map_frame_name"  default="/world"/>
+    <arg name="group_distance"  default="4.0"/>
+    
+    <!--default rviz ui -->
+    <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find warch_plan)/launch/rviz_config/swarm.rviz" />
+    
+    <!-- Random Map Generator: 50, 50, 5 -->
+    <node pkg ="map_generator" name ="random_complex" type ="random_complex" output = "screen">    
+        <param name="map/x_size"          value="32.0" />
+        <param name="map/y_size"          value="28.0" />
+        <param name="map/z_size"          value="3.0" />
+        <param name="map_frame_name"      value="$(arg map_frame_name)"/>
+
+        <param name="init_state_x"        value="$(arg init_x)"/>
+        <param name="init_state_y"        value="$(arg init_y)"/>
+        <param name="group_distance"      value="$(arg group_distance)"/>
+        
+        <param name="map/circle_num" value="30"/>        
+        <param name="map/obs_num"    value="100"/>        
+        <param name="map/resolution" value="0.1"/>     
+
+        <param name="ObstacleShape/lower_rad" value="0.1"/>
+        <param name="ObstacleShape/upper_rad" value="1.0"/>
+        <param name="ObstacleShape/lower_hei" value="1.0"/>
+        <param name="ObstacleShape/upper_hei" value="6.0"/>
+        <param name="CircleShape/lower_circle_rad"   value="0.6"/>        
+        <param name="CircleShape/upper_circle_rad"   value="2.5"/>        
+        
+        <param name="sensing/rate"   value="1.0"/>        
+    </node>
+</launch>
+

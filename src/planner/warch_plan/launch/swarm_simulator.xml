@@ -1,0 +1,81 @@
+<launch>
+  <arg name="init_x" />
+  <arg name="init_y" />
+  <arg name="init_z" /> 
+  <arg name="map_size_x_"/>
+  <arg name="map_size_y_"/>
+  <arg name="map_size_z_"/>
+  <arg name="uav_id"/>
+  <arg name="mv_obs_vel"/>
+
+  <arg name="sensing_horizon"/>
+  <arg name="sensing_rate"/>
+  <arg name="estimation_rate"/>
+  
+  <node pkg="so3_quadrotor_simulator" type="quadrotor_simulator_so3" name="uav_$(arg uav_id)_quadrotor_simulator_so3" output="screen">
+        <param name="rate/odom" value="200.0"/>
+        <param name="simulator/init_state_x" value="$(arg init_x)"/>
+        <param name="simulator/init_state_y" value="$(arg init_y)"/>
+        <param name="simulator/init_state_z" value="$(arg init_z)"/>
+
+        <remap from="~odom" to="/uav_$(arg uav_id)_visual_slam/odom"/>
+        <remap from="~cmd" to="uav_$(arg uav_id)_so3_cmd"/>
+        <remap from="~force_disturbance" to="force_disturbance"/>    
+        <remap from="~moment_disturbance" to="moment_disturbance"/>
+        <!--remap from="~imu" to="sim/imu"/-->   <!--imu exsit??-->      
+  </node>
+ 
+  <node pkg="nodelet" type="nodelet" args="standalone so3_control/SO3ControlNodelet" name="uav_$(arg uav_id)_so3_control" required="true" output="screen">
+        <param name="so3_control/init_state_x" value="$(arg init_x)"/>
+        <param name="so3_control/init_state_y" value="$(arg init_y)"/>
+        <param name="so3_control/init_state_z" value="$(arg init_z)"/>
+
+        <remap from="~odom" to="/uav_$(arg uav_id)_visual_slam/odom"/>
+        <!-- <remap from="~position_cmd" to="/uav_$(arg uav_id)_traj_server/position_command"/> -->
+        <remap from="~position_cmd" to="/uav_$(arg uav_id)_traj_server/pos_cmd"/>
+
+        <remap from="~motors" to="motors"/>
+        <remap from="~corrections" to="corrections"/>
+        <remap from="~so3_cmd" to="uav_$(arg uav_id)_so3_cmd"/>
+        <!--remap from="~imu"           to="sim/imu"/-->  <!--imu exsit??-->
+
+        <rosparam file="$(find so3_control)/config/gains_hummingbird.yaml"/>
+        <rosparam file="$(find so3_control)/config/corrections_hummingbird.yaml"/>
+        <param name="mass" value="0.98"/>
+        <param name="use_angle_corrections " value="false"/>
+        <param name="use_external_yaw "      value="false"/>
+        <param name="gains/rot/z" value="1.0"/>    
+        <param name="gains/ang/z" value="0.1"/>        
+  </node>  
+ 
+   <!-- Odom Visualization -->
+  <node pkg="odom_visualization" name="uav_$(arg uav_id)_odom_visualization" type="odom_visualization" output="screen">
+        <remap from="~odom" to="/uav_$(arg uav_id)_visual_slam/odom"/>
+        <param name="color/a" value="0.8"/>    
+        <param name="color/r" value="0.0"/>        
+        <param name="color/g" value="0.0"/>        
+        <param name="color/b" value="0.0"/>       
+        <param name="covariance_scale" value="100.0"/>       
+        <param name="robot_scale" value="1.0"/>
+        <param name="tf45" value="true"/>
+  </node>
+
+  <!-- Map pcl Info Render -->
+  <node pkg="local_sensing_node" type="pcl_render_node" name="uav_$(arg uav_id)_pcl_render_node" output="screen">
+        <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml" />
+            <!--load exit ??: 5, 30, 30--> 
+        <param name="sensing_horizon"   value="$(arg sensing_horizon)" />
+        <param name="sensing_rate"      value="$(arg sensing_rate)"/>
+        <param name="estimation_rate"   value="$(arg estimation_rate)"/>
+        <param name="map/x_size"     value="$(arg map_size_x_)"/>
+        <param name="map/y_size"     value="$(arg map_size_y_)"/>
+        <param name="map/z_size"     value="$(arg map_size_z_)"/>
+        <param name="map/mv_obs_vel" value="$(arg mv_obs_vel)"/>
+      
+        <remap from="~global_map"         to="/random_complex/global_map"/>
+         
+        <!--remap from="~cloud"   to="/uav_$(arg uav_id)_pcl_render_node/cloud"/-->
+        <remap from="~odometry"           to="/uav_$(arg uav_id)_visual_slam/odom"/>
+  </node>
+
+</launch>

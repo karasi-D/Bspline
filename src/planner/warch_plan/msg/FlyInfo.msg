@@ -1,0 +1,12 @@
+int32 uav_id_from
+int32 issue
+PathData pos
+PathData vel
+PathData acc
+float64 t_duration
+float64 traj_start_t
+PathData[] path_coord
+int32 traj_order
+float64[] coeff
+float64[] seg_t
+float64 all_time

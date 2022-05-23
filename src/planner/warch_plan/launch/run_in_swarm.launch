@@ -1,0 +1,90 @@
+<launch>
+  <!-- size of map, change the size inflate x, y, z according to your application -->
+  <arg name="map_size_x"/>
+  <arg name="map_size_y"/>
+  <arg name="map_size_z"/>
+  <arg name="init_x"/>
+  <arg name="init_y"/>
+  <arg name="init_z"/>
+  <arg name="target_x"/>
+  <arg name="target_y"/>
+  <arg name="target_z"/>
+  
+  <arg name="sensing_horizon"/>
+  <arg name="sensing_rate"/>
+  <arg name="estimation_rate"/>
+  <arg name="mv_obs_vel"/>
+
+  <arg name="uav_id"/>
+  <arg name="group_distance"/>
+  <arg name="group_num"/>
+  <arg name="envInfo_nbr1"/>
+  <arg name="envInfo_nbr2"/>
+
+  <!-- topic of your odometry such as VIO or LIO -->
+  <!--arg name="odom_topic"/-->
+
+  <!-- main algorithm params -->
+  <include file="$(find warch_plan)/launch/warch_plan_param.xml">
+
+      <arg name="envInfo_nbr1"   value = "$(arg envInfo_nbr1)"/>
+      <arg name="envInfo_nbr2"   value = "$(arg envInfo_nbr2)"/>
+      <arg name="uav_id"         value="$(arg uav_id)"/>
+      <arg name="group_distance" value="$(arg group_distance)"/>
+      <arg name="group_num"      value="$(arg group_num)"/>
+      <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+
+      <arg name="map_size_x"       value="$(arg map_size_x)"/>
+      <arg name="map_size_y"       value="$(arg map_size_y)"/>
+      <arg name="map_size_z"       value="$(arg map_size_z)"/>
+      <arg name="init_x"  value="$(arg init_x)"/>
+      <arg name="init_y"  value="$(arg init_y)"/>
+      <arg name="init_z"  value="$(arg init_z)"/>
+      <arg name="target_x" value="$(arg target_x)" />
+      <arg name="target_y" value="$(arg target_y)" />
+      <arg name="target_z" value="$(arg target_z)" />
+      <arg name="max_vel"   value="2.0" />
+      <arg name="max_acc"   value="2.0" />
+
+    
+  </include>
+
+  <!-- Trajectory Command server -->
+  <node pkg="warch_plan" type="traj_server" name="uav_$(arg uav_id)_traj_server" output="screen" launch-prefix="">
+
+        <!--bezier curve traj server-->
+        <!-- <remap from="~/odometry" to="/uav_$(arg uav_id)_visual_slam/odom"/>
+        <remap from="~/trajectory" to="/uav_$(arg uav_id)_warch_plan_node/trajectory"/>
+        <remap from = "~position_command"  to = "/uav_$(arg uav_id)_traj_server/position_command"/>
+        <param name="optimization/poly_order_min" value="3" /> 
+        <param name="optimization/poly_order_max" value="12"/> -->
+
+        <!--B spline traj server-->
+        <remap from="position_cmd" to="/uav_$(arg uav_id)_traj_server/pos_cmd"/>
+        <remap from="~planning/bspline" to="/uav_$(arg uav_id)_warch_plan_node/bspline"/>
+        <param name="traj_server/time_forward" value="1.0" type="double"/>
+
+  </node>
+
+  <!-- Quadrotor odom: render + Simulator + Controller + Visualization-->
+  <!--add uav_id-->     
+   <include file="$(find warch_plan)/launch/swarm_simulator.xml">
+    <arg name="uav_id" value="$(arg uav_id)"/>
+
+      <arg name="init_x" value="$(arg init_x)"/>
+      <arg name="init_y" value="$(arg init_y)"/>
+      <arg name="init_z" value="$(arg init_z)"/>
+      <arg name="map_size_x_" value="$(arg map_size_x)"/>
+      <arg name="map_size_y_" value="$(arg map_size_y)"/>
+      <arg name="map_size_z_" value="$(arg map_size_z)"/>
+      <arg name="mv_obs_vel"   value="$(arg mv_obs_vel)"/>
+
+      <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+      <arg name="sensing_rate" value="$(arg sensing_rate)"/>
+      <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+
+      <!--arg name="map_frame_name" value="$(arg map_frame_name)"/-->
+
+  </include>
+
+</launch>

@@ -1,0 +1,164 @@
+<launch>
+
+<arg name="map_size_x" default="46.0"/>
+<arg name="map_size_y" default="30.0"/>
+<arg name="map_size_z" default=" 4.0"/>
+
+<arg name="init_x" default="-18.0"/>
+<arg name="init_y" default="4.5"/>
+<arg name="init_z" default="0.2"/>
+<arg name="target_x" default="-11.0"/>
+<arg name="target_y" default="2.5"/>
+<arg name="target_z" default="2.0"/>
+
+<arg name="uav_id" value="0"/>
+<arg name="max_vel"   value="2.0" />
+<arg name="max_acc"   value="2.0" />
+
+<arg name="sensing_horizon"  default="8.0" />
+<arg name="sensing_rate"     default="30.0"/>
+<arg name="estimation_rate"  default="30.0"/>
+
+<arg name="map_frame_name"  default="/world"/>
+<arg name="group_num"       default="1"/>
+<arg name="group_distance"  default="4.0"/>
+<arg name="mv_obs_vel"      default="-2.0"/>
+
+
+    <!--pkg: 功能包名: 可执行文件名 name:节点名-->>
+  <node pkg="warch_plan" type="warch_plan_node" name="warch_plan_node" output="screen">
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <remap from="~odometry"       to="/visual_slam/odom"/>
+      <remap from="~map"            to="/pcl_render_node/cloud"/>
+      <remap from="~MvObsInfo"      to="/pcl_render_node/MvObs_Info"/>
+      <remap from="~bspline"        to = "/warch_plan_node/bspline"/>
+      <!--remap from="~command"        to="/position_cmd"/--> 
+      <param name="planning/is_use_fm"  value="true" />
+      <param name="planning/target_type"  value="1.0"/>
+      <param name="optimization/poly_order"  value="8"/> 
+      <param name="optimization/min_order"   value="3.0"/> 
+      <param name="map/x_size"       value="$(arg map_size_x)"/>
+      <param name="map/y_size"       value="$(arg map_size_y)"/>
+      <param name="map/z_size"       value="$(arg map_size_z)"/>
+      <param name="map/x_local_size" value="16.0"/>
+      <param name="map/y_local_size" value="16.0"/>
+      <param name="map/z_local_size" value="4.0" />
+      <param name="map/margin"       value="0.2" />
+
+      <param name="planning/init_x"  value="$(arg init_x)"/>
+      <param name="planning/init_y"  value="$(arg init_y)"/>
+      <param name="planning/init_z"  value="$(arg init_z)"/>
+      <param name="planning/target_x" value="$(arg target_x)"/>
+      <param name="planning/target_y" value="$(arg target_y)"/>
+      <param name="planning/target_z" value="$(arg target_z)"/>
+
+      <param name="planning/is_limit_vel"  value="true" />
+      <param name="planning/is_limit_acc"  value="false"/>
+      <param name="planning/max_inflate"  value="200"  />
+      <param name="planning/step_length"   value="1"    />
+      <param name="planning/cube_margin"   value="0.0"  />
+      <param name="planning/check_horizon" value="10.0" />
+      <param name="planning/stop_horizon"  value=" 3.0" />
+
+      <!-- plan param-->
+      <!-- <param name="planning/max_vel" value="$(arg max_vel)" type="double"/>
+      <param name="planning/max_acc" value="$(arg max_acc)" type="double"/> -->
+      <param name="planParam/uav_id"          value="$(arg uav_id)"/>
+      <param name="planParam/sensing_horizon" value="$(arg sensing_horizon)"/>
+      <param name="planParam/max_vel"         value="$(arg max_vel)"/>
+      <param name="planParam/max_acc"         value="$(arg max_acc)"/>
+      <param name="planParam/max_jerk"        value="4" type="double"/>
+      <param name="planParam/control_points_distance" value="0.4" type="double"/>
+      <param name="planParam/feasibility_tolerance"   value="0.05" type="double"/>
+
+      <param name="swarm/group_distance"    value="$(arg group_distance)"/>
+      <param name="swarm/group_num"    value="$(arg group_num)"/>
+
+      <param name="vis/vis_traj_width" value="0.15"/>
+      <param name="vis/is_proj_cube"   value="false"/>
+
+        <!-- trajectory optimization -->
+      <param name="optimization/lambda_smooth" value="1.0" type="double"/>
+      <param name="optimization/lambda_collision" value="0.5" type="double"/>
+      <param name="optimization/lambda_feasibility" value="0.1" type="double"/>
+      <param name="optimization/lambda_fitness" value="1.0" type="double"/>
+      <param name="optimization/dist0"    value="0.5" type="double"/>
+      <param name="optimization/swarm_clearance" value="0.5" type="double"/>
+      <param name="optimization/max_vel"  value="$(arg max_vel)"/>
+      <param name="optimization/max_acc"  value="$(arg max_acc)"/>
+  </node>
+
+  <!-- Trajectory Command server -->
+  <node pkg="warch_plan" type="traj_server" name="traj_server" output="screen" launch-prefix="">
+        <!--bezier curve traj server-->
+        <!-- <remap from = "~position_command"  to = "/traj_server/position_command"/>
+        <remap from="~/odometry" to="/visual_slam/odom"/>
+        <remap from="~/trajectory" to="/warch_plan_node/trajectory"/>
+
+        <param name="optimization/poly_order_min" value="3" /> 
+        <param name="optimization/poly_order_max" value="12"/>  -->
+        
+        <!--B spline traj server-->
+        <remap from="position_cmd" to="/traj_server/pos_cmd"/>
+        <remap from="~planning/bspline" to="/warch_plan_node/bspline"/>
+        <param name="traj_server/time_forward" value="1.0" type="double"/>
+  </node>
+
+  <!-- Set the goal -->
+  <node pkg="waypoint_generator" name="waypoint_generator" type="waypoint_generator" output="screen">
+      <remap from="~goal"           to="/goal"/>
+      <remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <param name="waypoint_type"   value="manual-lonely-waypoint"/>    
+  </node>
+
+    <!-- Random Map Generator -->
+  <node pkg ="map_generator" name ="random_complex" type ="random_complex" output = "screen">    
+      <remap from="~odometry"       to="/visual_slam/odom"/>
+
+      <param name="init_state_x"        value="$(arg init_x)"/>
+      <param name="init_state_y"        value="$(arg init_y)"/>
+      <param name="map/x_size"          value="32.0" />
+      <param name="map/y_size"          value="28.0" />
+      <param name="map/z_size"          value="3.0" />
+      <param name="map_frame_name"      value="$(arg map_frame_name)"/>
+      <param name="group_distance"      value="$(arg group_distance)"/>
+
+      <param name="map/circle_num" value="10"/>        
+      <param name="map/obs_num"    value="100"/>        
+      <param name="map/resolution" value="0.2"/>     
+
+      <param name="ObstacleShape/lower_rad" value="0.3"/>
+      <param name="ObstacleShape/upper_rad" value="1.5"/>
+      <param name="ObstacleShape/lower_hei" value="1.0"/>
+      <param name="ObstacleShape/upper_hei" value="6.0"/>
+      <param name="CircleShape/lower_circle_rad"   value="0.6"/>        
+      <param name="CircleShape/upper_circle_rad"   value="2.5"/>        
+    
+      <param name="sensing/rate"   value="1.0"/>        
+  </node>
+
+   <!-- Quadrotor odom: render + Simulator + Controller + Visualization-->  
+   <include file="$(find warch_plan)/launch/single_simulator.xml">
+      <arg name="init_x" value="$(arg init_x)"/>
+      <arg name="init_y" value="$(arg init_y)"/>
+      <arg name="init_z" value="$(arg init_z)"/>
+      <arg name="map_size_x_" value="$(arg map_size_x)"/>
+      <arg name="map_size_y_" value="$(arg map_size_y)"/>
+      <arg name="map_size_z_" value="$(arg map_size_z)"/>
+      <arg name="mv_obs_vel"   value="$(arg mv_obs_vel)"/>
+      
+      <arg name="sensing_horizon" value="$(arg sensing_horizon)"/>
+      <arg name="sensing_rate" value="$(arg sensing_rate)"/>
+      <arg name="estimation_rate" value="$(arg estimation_rate)"/>
+
+      <!--arg name="map_frame_name" value="$(arg map_frame_name)"/-->
+
+  </include>
+ 
+  <!--dynamic param set-->>
+  <!-- <node pkg="rqt_reconfigure" name="rqt_reconfigure" type="rqt_reconfigure" output="screen" /> -->
+  
+  <node name="rvizvisualisation" pkg="rviz" type="rviz" output="log" args="-d $(find warch_plan)/launch/rviz_config/single.rviz" />
+  
+
+</launch>

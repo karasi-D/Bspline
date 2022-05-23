@@ -1,0 +1,103 @@
+<launch>
+  <arg name="map_size_x"/>
+  <arg name="map_size_y"/>
+  <arg name="map_size_z"/>
+  <arg name="init_x"/>
+  <arg name="init_y"/>
+  <arg name="init_z"/>
+  <arg name="target_x"/>
+  <arg name="target_y"/>
+  <arg name="target_z"/>
+  <arg name="max_vel"/>
+  <arg name="max_acc"/>
+
+  <arg name="sensing_horizon"/>
+
+  <arg name="uav_id"/>
+  <arg name="group_distance"/>
+  <arg name="group_num"/>
+  <arg name="envInfo_nbr1"/>
+  <arg name="envInfo_nbr2"/>
+  
+  <!-- main node -->
+  <!-- <node pkg="warch_plan" name="warch_plan_node" type="warch_plan_node" output="screen" launch-prefix="valgrind"> -->
+  <node pkg="warch_plan" name="uav_$(arg uav_id)_warch_plan_node" type="warch_plan_node" output="screen">
+      <!--remap from="~waypoints"      to="/waypoint_generator/waypoints"/>
+      <remap from="~odometry"       to="/visual_slam/odom"/>
+      <remap from="~map"            to="/pcl_render_node/cloud"/--> 
+      
+      <!-- <remap from="~trajectory"       to="/uav_$(arg uav_id)_warch_plan_node/trajectory"/> -->
+      <remap from="~bspline"       to="/uav_$(arg uav_id)_warch_plan_node/bspline"/>
+
+      <remap from="~waypoints"          to="/waypoint_generator/waypoints"/>
+      <remap from="~odometry"           to="/uav_$(arg uav_id)_visual_slam/odom"/>
+      <remap from="~map"                to="/uav_$(arg uav_id)_pcl_render_node/cloud"/>
+      <remap from="~MvObsInfo"         to="/uav_$(arg uav_id)_pcl_render_node/MvObs_Info"/>
+
+      <remap from="~planning/envInfo_from_nbr_1" to = "/uav_$(arg envInfo_nbr1)_swap_envInfo"/>
+      <remap from="~planning/flyInfo_from_nbr_1" to = "/uav_$(arg envInfo_nbr1)_swap_flyInfo"/>
+      <remap from="~planning/envInfo_from_nbr_2" to = "/uav_$(arg envInfo_nbr2)_swap_envInfo"/>
+      <remap from="~planning/flyInfo_from_nbr_2" to = "/uav_$(arg envInfo_nbr2)_swap_flyInfo"/>
+      <remap from="~planning/envInfo_self_pub"   to = "/uav_$(arg uav_id)_swap_envInfo"/>
+      <remap from="~planning/flyInfo_self_pub"   to = "/uav_$(arg uav_id)_swap_flyInfo"/>
+
+      <param name="planning/is_use_fm"  value="true" />
+      <param name="planning/target_type"  value="1.0"/>
+      <param name="optimization/poly_order"  value="8"/> 
+      <param name="optimization/min_order"   value="3.0"/> 
+      <param name="map/x_size"       value="$(arg map_size_x)"/>
+      <param name="map/y_size"       value="$(arg map_size_y)"/>
+      <param name="map/z_size"       value="$(arg map_size_z)"/>
+      <param name="planning/init_x"  value="$(arg init_x)"/>
+      <param name="planning/init_y"  value="$(arg init_y)"/>
+      <param name="planning/init_z"  value="$(arg init_z)"/>
+      <param name="planning/target_x" value="$(arg target_x)" />
+      <param name="planning/target_y" value="$(arg target_y)" />
+      <param name="planning/target_z" value="$(arg target_z)" />
+
+      <param name="map/x_local_size" value="16.0"/>
+      <param name="map/y_local_size" value="16.0"/>
+      <param name="map/z_local_size" value="4.0" />
+      <param name="map/margin"       value="0.2" />
+      <param name="map/resolution"   value="0.2" />
+      <param name="vis/vis_traj_width" value="0.15"/>
+      <param name="vis/is_proj_cube"   value="false"/>
+      
+      <param name="planning/max_inflate"  value="200"  />
+      <param name="planning/step_length"   value="1"    />
+      <param name="planning/cube_margin"   value="0.0"  />
+
+      <param name="planning/check_horizon" value="10.0" />
+      <param name="planning/stop_horizon"  value=" 3.0" />
+      <param name="planning/is_limit_vel"  value="true" />
+      <param name="planning/is_limit_acc"  value="false"/>
+      <param name="planning/thresh_no_replan_meter" value="1.0" type="double"/> 
+      <param name="planning/thresh_replan_meter" value="1.0" type="double"/> 
+    
+      <!-- plan param-->
+      <!-- <param name="planning/max_vel" value="$(arg max_vel)" type="double"/>
+      <param name="planning/max_acc" value="$(arg max_acc)" type="double"/> -->
+      <param name="planParam/uav_id"          value="$(arg uav_id)"/>
+      <param name="planParam/sensing_horizon" value="$(arg sensing_horizon)"/>
+      <param name="planParam/max_vel"         value="$(arg max_vel)"/>
+      <param name="planParam/max_acc"         value="$(arg max_acc)"/>
+      <param name="planParam/max_jerk"        value="4" type="double"/>
+      <param name="planParam/control_points_distance" value="0.4" type="double"/>
+      <param name="planParam/feasibility_tolerance"   value="0.05" type="double"/>
+
+      <param name="swarm/group_distance"    value="$(arg group_distance)"/>
+      <param name="swarm/group_num"    value="$(arg group_num)"/>
+
+        <!-- trajectory optimization -->
+      <param name="optimization/lambda_smooth" value="1.0" type="double"/>
+      <param name="optimization/lambda_collision" value="0.5" type="double"/>
+      <param name="optimization/lambda_feasibility" value="0.1" type="double"/>
+      <param name="optimization/lambda_fitness" value="1.0" type="double"/>
+      <param name="optimization/dist0"    value="0.5" type="double"/>
+      <param name="optimization/swarm_clearance" value="0.5" type="double"/>
+      <param name="optimization/max_vel"  value="$(arg max_vel)" />
+      <param name="optimization/max_acc"  value="$(arg max_acc)"/>
+
+  </node>
+
+</launch>
